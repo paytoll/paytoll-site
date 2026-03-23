@@ -8,6 +8,7 @@
 <meta name="keywords" content="solana, mpp, machine payments, api monetization, http 402, developer tools, middleware, express, typescript">
 <meta name="author" content="PayToll">
 <meta name="theme-color" content="#FAFAF8">
+<meta name="robots" content="index, follow">
 
 <!-- Open Graph -->
 <meta property="og:type" content="website">
@@ -35,6 +36,30 @@
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+
+<!-- Structured Data -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "SoftwareApplication",
+  "name": "PayToll",
+  "description": "Open-source developer toolkit for accepting machine payments on Solana via the Machine Payments Protocol (MPP)",
+  "url": "https://paytoll-site.vercel.app",
+  "applicationCategory": "DeveloperApplication",
+  "operatingSystem": "Cross-platform",
+  "license": "https://opensource.org/licenses/MIT",
+  "offers": {
+    "@type": "Offer",
+    "price": "0",
+    "priceCurrency": "USD"
+  },
+  "author": {
+    "@type": "Organization",
+    "name": "PayToll",
+    "url": "https://github.com/paytoll"
+  }
+}
+</script>
 <style>
 :root{
   --bg:#FAFAF8;--bg2:#F3F2EF;--bg3:#FFF;--bgD:#141414;--bgC:#1A1A1C;
@@ -123,12 +148,12 @@ body{padding-left:48px}
 .code-svg circle{opacity:0}.code-svg circle.vis{animation:fadeIn .4s ease forwards}
 
 /* ========== LOGO BAR ========== */
-.logos{padding:56px 0;border-top:1px solid var(--bdL);border-bottom:1px solid var(--bdL)}
-.logos-in{display:flex;align-items:center;gap:48px;justify-content:center}
-.logos-label{font-size:10px;letter-spacing:2.5px;text-transform:uppercase;color:var(--tx3);white-space:nowrap;font-weight:500}
-.logos-row{display:flex;align-items:center;gap:44px}
-.logo-img{height:22px;width:auto;opacity:.35;transition:opacity .25s;display:block}
-.logo-img:hover{opacity:.7}
+.logos{padding:72px 0;border-top:1px solid var(--bdL);border-bottom:1px solid var(--bdL)}
+.logos-in{display:flex;align-items:center;gap:56px;justify-content:center}
+.logos-label{font-size:12px;letter-spacing:2.5px;text-transform:uppercase;color:var(--tx3);white-space:nowrap;font-weight:500}
+.logos-row{display:flex;align-items:center;gap:56px}
+.logo-img{height:40px;width:auto;opacity:.45;transition:opacity .25s;display:block}
+.logo-img:hover{opacity:.8}
 
 /* ========== SECTION TITLES ========== */
 .sec{padding:160px 0}
@@ -309,7 +334,7 @@ body{padding-left:48px}
 @media(max-width:600px){
   .hero h1{font-size:26px}.sec h2,.cta h2{font-size:24px}
   .hero-a{flex-direction:column;gap:8px}.cta-a{flex-direction:column;align-items:center;gap:8px}
-  .logos-in{flex-direction:column;gap:16px}.logos-row{flex-wrap:wrap;gap:20px;justify-content:center}
+  .logos-in{flex-direction:column;gap:16px}.logos-row{flex-wrap:wrap;gap:28px;justify-content:center}.logo-img{height:32px}
   .pf{grid-template-columns:1fr}
   .ft-cols{grid-template-columns:1fr}
   .ft-btm{flex-direction:column;gap:12px;text-align:center}
@@ -411,8 +436,8 @@ body{padding-left:48px}
 <section class="logos"><div class="c"><div class="logos-in">
   <span class="logos-label">Built on</span>
   <div class="logos-row">
-    <img src="assets/solana.png" alt="Solana" class="logo-img">
-    <img src="assets/stripe.png" alt="Stripe" class="logo-img">
+    <img src="assets/solana.svg" alt="Solana" class="logo-img">
+    <img src="assets/stripe.svg" alt="Stripe" class="logo-img">
   </div>
 </div></div></section>
 
@@ -902,7 +927,7 @@ app.<span class="fn">use</span>(<span class="str">'/mcp'</span>, <span class="fn
     <div class="ft-cols">
       <div><div class="ft-ct">Product</div><a class="ft-lk" onclick="go('home')">SDK</a><a class="ft-lk" onclick="go('home')">CLI</a><a class="ft-lk" onclick="go('home')">Dashboard</a><a class="ft-lk" onclick="go('pricing')">Pricing</a></div>
       <div><div class="ft-ct">Developers</div><a class="ft-lk" onclick="go('docs')">Docs</a><a class="ft-lk" onclick="go('docs')">Quickstart</a><a class="ft-lk" onclick="go('docs')">Examples</a><a href="https://github.com/paytoll/paytoll-sdk/releases" target="_blank" class="ft-lk">Changelog</a></div>
-      <div><div class="ft-ct">Resources</div><a class="ft-lk" onclick="go('blog')">Blog</a><a href="https://mpp.dev" class="ft-lk" target="_blank">MPP Spec ↗</a><a href="https://github.com/paytoll/paytoll-sdk" class="ft-lk" target="_blank">GitHub ↗</a><a href="https://x.com/paytoll" target="_blank" class="ft-lk">X ↗</a></div>
+      <div><div class="ft-ct">Resources</div><a class="ft-lk" onclick="go('blog')">Blog</a><a href="https://mpp.dev" class="ft-lk" target="_blank">MPP Spec ↗</a><a href="https://github.com/paytoll/paytoll-sdk" class="ft-lk" target="_blank">GitHub ↗</a></div>
       <div><div class="ft-ct">Legal</div><a href="https://github.com/paytoll/paytoll-sdk/blob/main/LICENSE" target="_blank" class="ft-lk">Terms</a><a href="https://github.com/paytoll/paytoll-sdk/blob/main/LICENSE" target="_blank" class="ft-lk">Privacy</a><a href="https://github.com/paytoll/paytoll-sdk/blob/main/LICENSE" target="_blank" class="ft-lk">License</a></div>
     </div>
   </div>
