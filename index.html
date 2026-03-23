@@ -243,6 +243,8 @@ body{padding-left:48px}
 .docs-nav-link{display:block;font-size:12px;padding:6px 12px;color:var(--tx2);transition:all .12s;margin-bottom:1px}
 .docs-nav-link:hover{color:var(--tx);background:var(--bg3)}
 .docs-nav-link.active{color:var(--pr);background:var(--prS)}
+.docs-mobile-select{display:none;width:100%;font-family:var(--f);font-size:12px;padding:12px 14px;background:var(--bg3);border:1px solid var(--bd);color:var(--tx);appearance:none;-webkit-appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23999' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 12px center;cursor:pointer}
+.docs-mobile-select:focus{outline:1px solid var(--pr);border-color:var(--pr)}
 .docs-content{padding:48px 56px 120px;max-width:800px;overflow-x:hidden}
 .docs-content h1{font-size:32px;font-weight:800;letter-spacing:-.03em;margin-bottom:12px}
 .docs-content .docs-subtitle{font-size:14px;color:var(--tx2);margin-bottom:40px;line-height:1.7}
@@ -320,10 +322,8 @@ body{padding-left:48px}
   .hamburger{display:flex}
   .tab-menu{display:none!important}
   .docs-page{grid-template-columns:1fr}
-  .docs-nav{position:relative;height:auto;display:block;border-right:none;border-bottom:1px solid var(--bd);padding:16px 0}
-  .docs-nav-section{display:flex;flex-wrap:wrap;gap:4px;padding:0 16px;margin-bottom:8px}
-  .docs-nav-title{width:100%;margin-bottom:4px}
-  .docs-nav-link{font-size:11px;padding:4px 10px}
+  .docs-nav{display:none}
+  .docs-mobile-select{display:block;margin:16px 20px;width:calc(100% - 40px)}
   .docs-content{padding:24px 20px 80px;max-width:100%;overflow-x:hidden}
   .docs-content pre{max-width:100%;overflow-x:auto;font-size:11px;padding:14px}
   .docs-content table{display:block;overflow-x:auto;max-width:100%}
@@ -635,6 +635,23 @@ body{padding-left:48px}
       <a class="docs-nav-link" onclick="scrollToDoc('examples')">Examples</a>
     </div>
   </nav>
+  <select class="docs-mobile-select" onchange="scrollToDoc(this.value)">
+    <option value="overview">— Navigate docs —</option>
+    <optgroup label="Getting Started">
+      <option value="overview">Overview</option>
+      <option value="quickstart">Quickstart</option>
+      <option value="config">Configuration</option>
+    </optgroup>
+    <optgroup label="Core Concepts">
+      <option value="charge">Charge Mode</option>
+      <option value="session">Session Mode</option>
+      <option value="security">Security Model</option>
+    </optgroup>
+    <optgroup label="SDK Reference">
+      <option value="cli">CLI Commands</option>
+      <option value="examples">Examples</option>
+    </optgroup>
+  </select>
   <div class="docs-content" id="docsContent">
     <h1>PayToll Documentation</h1>
     <p class="docs-subtitle">The open-source developer toolkit for machine payments on Solana. Everything you need to monetize any API using the Machine Payments Protocol.</p>
