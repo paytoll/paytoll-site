@@ -857,62 +857,34 @@ app.<span class="fn">use</span>(<span class="str">'/mcp'</span>, <span class="fn
 <!-- ==================== PRICING PAGE ==================== -->
 <div class="page" id="page-pricing">
 <section class="sec"><div class="c">
-  <div class="rv"><h2>Pricing</h2><p class="sec-d">PayToll is free and open source. Self-host everything at zero cost. The hosted gateway takes a small percentage of transaction volume — we only earn when you earn.</p></div>
-  <div class="pricing-grid rv d1">
-    <div class="price-card">
-      <div class="price-name">Self-Hosted</div>
-      <div class="price-amount">Free</div>
-      <div class="price-period">forever · 0% fees</div>
-      <ul class="price-features">
-        <li>Full SDK &amp; middleware</li>
-        <li>CLI tools</li>
-        <li>Self-hosted dashboard</li>
-        <li>Local testing (Surfpool)</li>
-        <li>Charge &amp; Session modes</li>
-        <li>Unlimited endpoints</li>
-        <li>Unlimited transaction volume</li>
-        <li>MIT licensed source code</li>
-        <li>Community support (GitHub)</li>
-      </ul>
-      <a class="price-btn" onclick="go('docs')">Get started →</a>
-    </div>
-    <div class="price-card featured">
-      <div class="price-name">Hosted Gateway</div>
-      <div class="price-amount">0.5%</div>
-      <div class="price-period">of transaction volume · coming soon</div>
-      <ul class="price-features">
-        <li>Everything in Self-Hosted</li>
-        <li>Managed dashboard (no deploy)</li>
-        <li>Webhook notifications</li>
-        <li>Slack / Discord alerts</li>
-        <li>Advanced analytics</li>
-        <li>Multi-wallet support</li>
-        <li>Custom RPC endpoints</li>
-        <li>Priority support</li>
-        <li>No monthly fees — pay only on volume</li>
-      </ul>
-      <a class="price-btn" href="javascript:void(0)">Join waitlist →</a>
-    </div>
-    <div class="price-card">
-      <div class="price-name">Enterprise</div>
-      <div class="price-amount">Custom</div>
-      <div class="price-period">volume discounts available</div>
-      <ul class="price-features">
-        <li>Everything in Hosted</li>
-        <li>Dedicated infrastructure</li>
-        <li>SLA guarantees</li>
-        <li>Custom integrations</li>
-        <li>On-call engineering support</li>
-        <li>Compliance reporting</li>
-        <li>White-label option</li>
-        <li>Reduced fee at scale</li>
-        <li>SOC 2 available</li>
-      </ul>
-      <a class="price-btn" href="javascript:void(0)">Contact us →</a>
-    </div>
+  <div class="rv" style="text-align:center;max-width:600px;margin:0 auto">
+    <h2>Free. Open source.<br>No catch.</h2>
+    <p class="sec-d" style="max-width:460px;margin-left:auto;margin-right:auto">PayToll is a free, MIT-licensed developer tool. No paid tiers. No platform fees. No transaction cuts. Everything is yours.</p>
   </div>
-  <div style="text-align:center;margin-top:60px;max-width:500px;margin-left:auto;margin-right:auto">
-    <p style="font-size:13px;color:var(--tx2);line-height:1.8">Self-hosting is always free with zero fees. The 0.5% hosted fee only applies if you choose the managed gateway — and you can switch to self-hosted at any time. No lock-in. Your keys, your wallet, your revenue.</p>
+  <div style="max-width:480px;margin:0 auto" class="rv d1">
+    <div style="background:var(--bg3);border:1px solid var(--bd);padding:48px 40px">
+      <div style="font-size:48px;font-weight:800;letter-spacing:-.04em;margin-bottom:8px">$0</div>
+      <div style="font-size:12px;color:var(--tx3);margin-bottom:32px">forever · no limits · MIT license</div>
+      <ul style="list-style:none;margin-bottom:36px">
+        <li style="font-size:13px;color:var(--tx2);padding:10px 0;border-bottom:1px solid var(--bdL)">Full SDK &amp; Express/Hono middleware</li>
+        <li style="font-size:13px;color:var(--tx2);padding:10px 0;border-bottom:1px solid var(--bdL)">CLI tools — init, dev, test, status</li>
+        <li style="font-size:13px;color:var(--tx2);padding:10px 0;border-bottom:1px solid var(--bdL)">Real on-chain Solana payment verification</li>
+        <li style="font-size:13px;color:var(--tx2);padding:10px 0;border-bottom:1px solid var(--bdL)">Charge mode (one-time) &amp; Session mode (streaming)</li>
+        <li style="font-size:13px;color:var(--tx2);padding:10px 0;border-bottom:1px solid var(--bdL)">SOL and USDC support</li>
+        <li style="font-size:13px;color:var(--tx2);padding:10px 0;border-bottom:1px solid var(--bdL)">Unlimited endpoints &amp; transaction volume</li>
+        <li style="font-size:13px;color:var(--tx2);padding:10px 0;border-bottom:1px solid var(--bdL)">Fee sponsorship (server pays gas)</li>
+        <li style="font-size:13px;color:var(--tx2);padding:10px 0;border-bottom:1px solid var(--bdL)">Replay protection &amp; HMAC challenge signing</li>
+        <li style="font-size:13px;color:var(--tx2);padding:10px 0;border-bottom:1px solid var(--bdL)">Full source code on GitHub</li>
+        <li style="font-size:13px;color:var(--tx2);padding:10px 0">Community support via GitHub Issues</li>
+      </ul>
+      <a style="display:block;text-align:center;font-size:13px;font-weight:600;padding:14px;background:var(--tx);color:var(--txI);cursor:pointer;transition:background .2s" onmouseover="this.style.background='#7C3AED'" onmouseout="this.style.background='#111'" onclick="go('docs')">Start building →</a>
+    </div>
+    <div style="text-align:center;margin-top:32px">
+      <div style="font-size:12px;color:var(--tx3);background:var(--bg3);padding:12px 24px;border:1px solid var(--bd);display:inline-flex;align-items:center;gap:12px;cursor:pointer" onclick="navigator.clipboard.writeText('npm install @paytoll/sdk')">
+        <span>$ npm install @paytoll/sdk</span>
+        <span style="font-size:10px;color:var(--tx3);background:var(--bg2);padding:2px 6px;border:1px solid var(--bd)">copy</span>
+      </div>
+    </div>
   </div>
 </div></section>
 </div>
