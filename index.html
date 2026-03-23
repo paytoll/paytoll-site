@@ -4,6 +4,36 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>PayToll — Monetize any API with machine payments</title>
+<meta name="description" content="Open-source developer toolkit for accepting machine payments on Solana via the Machine Payments Protocol (MPP). Ship a paid API in 60 seconds.">
+<meta name="keywords" content="solana, mpp, machine payments, api monetization, http 402, developer tools, middleware, express, typescript">
+<meta name="author" content="PayToll">
+<meta name="theme-color" content="#FAFAF8">
+
+<!-- Open Graph -->
+<meta property="og:type" content="website">
+<meta property="og:title" content="PayToll — Monetize any API with machine payments">
+<meta property="og:description" content="Open-source developer toolkit for accepting machine payments on Solana. Built on MPP. Ship a paid API in 60 seconds.">
+<meta property="og:url" content="https://paytoll-site.vercel.app">
+<meta property="og:image" content="https://paytoll-site.vercel.app/assets/og-card.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:site_name" content="PayToll">
+
+<!-- Twitter Card -->
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="PayToll — Monetize any API with machine payments">
+<meta name="twitter:description" content="Open-source developer toolkit for accepting machine payments on Solana. Built on MPP.">
+<meta name="twitter:image" content="https://paytoll-site.vercel.app/assets/og-card.png">
+
+<!-- Favicon -->
+<link rel="icon" type="image/svg+xml" href="assets/favicon.svg">
+<link rel="icon" type="image/png" sizes="32x32" href="assets/favicon-32.png">
+<link rel="apple-touch-icon" sizes="180x180" href="assets/apple-touch-icon.png">
+
+<!-- Canonical -->
+<link rel="canonical" href="https://paytoll-site.vercel.app">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
 :root{
@@ -317,7 +347,7 @@ body{padding-left:48px}
     </div>
     <a class="nav-tab" onclick="go('blog')">blog<span class="ext">.md</span></a>
     <a class="nav-tab" onclick="go('pricing')">pricing<span class="ext">.json</span></a>
-    <a class="nav-tab" href="https://github.com/paytoll" target="_blank">github<span class="ext"> ↗</span></a>
+    <a class="nav-tab" href="https://github.com/paytoll/paytoll-sdk" target="_blank">github<span class="ext"> ↗</span></a>
   </div>
   <div class="n-r"><a class="nav-cta" onclick="go('docs')">Start building →</a></div>
   <div class="hamburger" id="hamburger" onclick="toggleMobile()"><span></span></div>
@@ -329,7 +359,7 @@ body{padding-left:48px}
   <a onclick="go('docs');closeMobile()">Developers</a>
   <a onclick="go('blog');closeMobile()">Blog</a>
   <a onclick="go('pricing');closeMobile()">Pricing</a>
-  <a href="https://github.com/paytoll" target="_blank">GitHub ↗</a>
+  <a href="https://github.com/paytoll/paytoll-sdk" target="_blank">GitHub ↗</a>
   <a class="mm-cta" onclick="go('docs');closeMobile()">Start building →</a>
 </div>
 
@@ -449,7 +479,7 @@ body{padding-left:48px}
     <a class="dc" onclick="go('docs');setTimeout(()=>scrollToDoc('charge'),100)"><h3>Guides</h3><p>Express, Sessions, fee sponsorship, Next.js integration.</p><span class="dl">Read guides →</span></a>
     <a class="dc" onclick="go('docs');setTimeout(()=>scrollToDoc('config'),100)"><h3>API Reference</h3><p>Full SDK docs. Config, middleware, CLI, TypeScript types.</p><span class="dl">View reference →</span></a>
     <a class="dc" onclick="go('docs');setTimeout(()=>scrollToDoc('examples'),100)"><h3>Examples</h3><p>Weather API, stock quotes, AI inference, MCP tools.</p><span class="dl">See examples →</span></a>
-    <a class="dc" href="https://github.com/paytoll" target="_blank"><h3>GitHub</h3><p>Source code, issues, PRs. MIT licensed.</p><span class="dl">View source →</span></a>
+    <a class="dc" href="https://github.com/paytoll/paytoll-sdk" target="_blank"><h3>GitHub</h3><p>Source code, issues, PRs. MIT licensed.</p><span class="dl">View source →</span></a>
     <a class="dc" href="https://mpp.dev" target="_blank"><h3>MPP Spec</h3><p>Machine Payments Protocol. IETF draft.</p><span class="dl">Read spec →</span></a>
   </div>
 </div></section>
@@ -458,7 +488,7 @@ body{padding-left:48px}
 <section class="cta"><div class="c"><div class="rv">
   <h2>Your API should<br><em>make money.</em></h2>
   <p class="cta-desc">Install PayToll. Define prices. Deploy.<br>Agents pay you directly.</p>
-  <div class="cta-a"><a class="bp" onclick="go('docs')">Read the docs →</a><a href="https://github.com/paytoll" class="bs">View on GitHub</a></div>
+  <div class="cta-a"><a class="bp" onclick="go('docs')">Read the docs →</a><a href="https://github.com/paytoll/paytoll-sdk" class="bs">View on GitHub</a></div>
   <div class="cta-cp" onclick="navigator.clipboard.writeText('npm install @paytoll/sdk')"><span>$ npm install @paytoll/sdk</span><span class="h">copy</span></div>
 </div></div></section>
 
@@ -871,12 +901,12 @@ app.<span class="fn">use</span>(<span class="str">'/mcp'</span>, <span class="fn
     </div>
     <div class="ft-cols">
       <div><div class="ft-ct">Product</div><a class="ft-lk" onclick="go('home')">SDK</a><a class="ft-lk" onclick="go('home')">CLI</a><a class="ft-lk" onclick="go('home')">Dashboard</a><a class="ft-lk" onclick="go('pricing')">Pricing</a></div>
-      <div><div class="ft-ct">Developers</div><a class="ft-lk" onclick="go('docs')">Docs</a><a class="ft-lk" onclick="go('docs')">Quickstart</a><a class="ft-lk" onclick="go('docs')">Examples</a><a href="#" class="ft-lk">Changelog</a></div>
-      <div><div class="ft-ct">Resources</div><a class="ft-lk" onclick="go('blog')">Blog</a><a href="https://mpp.dev" class="ft-lk" target="_blank">MPP Spec ↗</a><a href="https://github.com/paytoll" class="ft-lk" target="_blank">GitHub ↗</a><a href="#" class="ft-lk">X ↗</a></div>
-      <div><div class="ft-ct">Legal</div><a href="#" class="ft-lk">Terms</a><a href="#" class="ft-lk">Privacy</a><a href="#" class="ft-lk">License</a></div>
+      <div><div class="ft-ct">Developers</div><a class="ft-lk" onclick="go('docs')">Docs</a><a class="ft-lk" onclick="go('docs')">Quickstart</a><a class="ft-lk" onclick="go('docs')">Examples</a><a href="https://github.com/paytoll/paytoll-sdk/releases" target="_blank" class="ft-lk">Changelog</a></div>
+      <div><div class="ft-ct">Resources</div><a class="ft-lk" onclick="go('blog')">Blog</a><a href="https://mpp.dev" class="ft-lk" target="_blank">MPP Spec ↗</a><a href="https://github.com/paytoll/paytoll-sdk" class="ft-lk" target="_blank">GitHub ↗</a><a href="https://x.com/paytoll" target="_blank" class="ft-lk">X ↗</a></div>
+      <div><div class="ft-ct">Legal</div><a href="https://github.com/paytoll/paytoll-sdk/blob/main/LICENSE" target="_blank" class="ft-lk">Terms</a><a href="https://github.com/paytoll/paytoll-sdk/blob/main/LICENSE" target="_blank" class="ft-lk">Privacy</a><a href="https://github.com/paytoll/paytoll-sdk/blob/main/LICENSE" target="_blank" class="ft-lk">License</a></div>
     </div>
   </div>
-  <div class="ft-btm"><span>© 2026 PayToll. MIT License.</span><div class="ft-bl"><a href="#">Terms</a><a href="#">Privacy</a><a href="https://github.com/paytoll" target="_blank">GitHub</a></div></div>
+  <div class="ft-btm"><span>© 2026 PayToll. MIT License.</span><div class="ft-bl"><a href="https://github.com/paytoll/paytoll-sdk/blob/main/LICENSE" target="_blank">Terms</a><a href="https://github.com/paytoll/paytoll-sdk/blob/main/LICENSE" target="_blank">Privacy</a><a href="https://github.com/paytoll/paytoll-sdk" target="_blank">GitHub</a></div></div>
 </div></footer>
 
 <script>
