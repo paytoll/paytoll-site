@@ -252,8 +252,11 @@ body{padding-left:48px}
 .docs-content h3{font-size:16px;font-weight:600;margin:36px 0 12px}
 .docs-content p{font-size:13px;color:var(--tx2);line-height:1.85;margin-bottom:16px}
 .docs-content code{background:var(--bg2);padding:2px 5px;font-size:11.5px;color:var(--pr)}
-.docs-content pre{background:var(--bgC);padding:20px;margin:16px 0 24px;font-size:12px;line-height:1.9;color:#A1A1AA;overflow-x:auto;max-width:100%;white-space:pre-wrap;word-break:break-word}
-.docs-content pre .kw{color:#C084FC}.docs-content pre .str{color:#86EFAC}.docs-content pre .fn{color:#A78BFA}.docs-content pre .cm{color:#444}
+.docs-content pre{background:var(--bgC);padding:20px;margin:16px 0 24px;font-size:12px;line-height:1.9;color:#A1A1AA;overflow-x:auto;max-width:100%;white-space:pre-wrap;word-break:break-word;position:relative}
+.docs-content pre .kw{color:#C084FC}.docs-content pre .str{color:#86EFAC}.docs-content pre .fn{color:#A78BFA}.docs-content pre .cm{color:#444}.docs-content pre .ps{color:#666;user-select:none}
+.code-copy{position:absolute;top:8px;right:8px;font-family:var(--f);font-size:10px;padding:4px 10px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);color:#666;cursor:pointer;transition:all .15s;z-index:1}
+.code-copy:hover{color:#aaa;background:rgba(255,255,255,.1);border-color:rgba(255,255,255,.2)}
+.code-copy.copied{color:var(--pr);border-color:var(--pr)}
 .docs-content table{width:100%;border-collapse:collapse;margin:20px 0;font-size:12px;display:block;overflow-x:auto}
 .docs-content th{text-align:left;padding:10px 14px;background:var(--bg2);border:1px solid var(--bd);font-weight:600;font-size:11px;text-transform:uppercase;letter-spacing:1px;color:var(--tx3)}
 .docs-content td{padding:10px 14px;border:1px solid var(--bd);color:var(--tx2)}
@@ -1013,6 +1016,22 @@ const to=new IntersectionObserver(es=>{
   })
 },{threshold:.2});
 document.querySelectorAll('[data-typed]').forEach(el=>to.observe(el));
+
+// Copy buttons on all docs code blocks
+document.querySelectorAll('.docs-content pre').forEach(pre=>{
+  const btn=document.createElement('button');
+  btn.className='code-copy';
+  btn.textContent='copy';
+  btn.onclick=()=>{
+    const text=pre.textContent.replace(/^copy/,'').replace(/\$ /gm,'').trim();
+    navigator.clipboard.writeText(text).then(()=>{
+      btn.textContent='copied';
+      btn.classList.add('copied');
+      setTimeout(()=>{btn.textContent='copy';btn.classList.remove('copied')},1500);
+    });
+  };
+  pre.appendChild(btn);
+});
 </script>
 </body>
 </html>
