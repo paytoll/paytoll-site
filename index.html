@@ -1,0 +1,973 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PayToll — Monetize any API with machine payments</title>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#FAFAF8;--bg2:#F3F2EF;--bg3:#FFF;--bgD:#141414;--bgC:#1A1A1C;
+  --tx:#111;--tx2:#666;--tx3:#999;--txI:#FAFAF8;
+  --pr:#7C3AED;--prS:#EDE9FE;--prM:#A78BFA;
+  --bd:#E5E4E0;--bdL:#EEEDEA;
+  --f:'JetBrains Mono',monospace;--mw:1200px;
+}
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth;-webkit-font-smoothing:antialiased}
+body{font-family:var(--f);background:var(--bg);color:var(--tx);line-height:1.65;overflow-x:hidden;font-size:13px}
+a{color:inherit;text-decoration:none}button{font-family:inherit;border:none;cursor:pointer;background:none}
+.c{max-width:var(--mw);margin:0 auto;padding:0 40px}
+
+/* Animations */
+@keyframes blink{0%,100%{opacity:1}50%{opacity:0}}
+@keyframes fadeUp{from{opacity:0;transform:translateY(32px)}to{opacity:1;transform:translateY(0)}}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+@keyframes slideD{from{opacity:0;transform:translateY(-8px)}to{opacity:1;transform:translateY(0)}}
+@keyframes draw{from{stroke-dashoffset:500}to{stroke-dashoffset:0}}
+@keyframes glow{0%,100%{opacity:.03}50%{opacity:.06}}
+
+.rv{opacity:0;transform:translateY(36px);transition:opacity .8s cubic-bezier(.16,1,.3,1),transform .8s cubic-bezier(.16,1,.3,1)}
+.rv.v{opacity:1;transform:translateY(0)}.d1{transition-delay:.1s}.d2{transition-delay:.2s}.d3{transition-delay:.3s}
+
+/* ========== LINE NUMBERS BACKGROUND ========== */
+.line-bg{position:fixed;top:0;left:0;width:48px;height:100vh;z-index:50;pointer-events:none;display:flex;flex-direction:column;padding-top:56px;overflow:hidden}
+.line-bg span{display:block;font-size:10px;color:rgba(0,0,0,.08);text-align:right;padding-right:12px;height:20px;line-height:20px;user-select:none}
+body{padding-left:48px}
+
+/* ========== NAV (Tab style) ========== */
+.nav{position:sticky;top:0;z-index:100;background:rgba(250,250,248,.92);backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);border-bottom:1px solid var(--bd);height:56px}
+.nav-in{display:flex;align-items:center;height:100%;gap:0}
+.logo{font-size:15px;font-weight:700;letter-spacing:-.02em;display:flex;align-items:center;gap:0;padding-right:32px;border-right:1px solid var(--bd);margin-right:0;cursor:pointer}
+.logo-toll{transition:color .2s}
+.logo:hover .logo-toll{color:var(--pr)}
+.nav-tabs{display:flex;align-items:center;height:100%;flex:1}
+.nav-tab{font-size:12px;font-weight:500;padding:0 18px;height:100%;display:flex;align-items:center;color:var(--tx3);border-right:1px solid var(--bd);transition:all .15s;position:relative;white-space:nowrap}
+.nav-tab:hover{color:var(--tx);background:rgba(0,0,0,.02)}
+.nav-tab.active{color:var(--pr);background:var(--prS)}
+.nav-tab .ext{font-size:9px;opacity:.4;margin-left:3px}
+/* Dropdown from tabs */
+.tab-dd{position:relative}
+.tab-menu{display:none;position:absolute;top:55px;left:0;background:var(--bg3);border:1px solid var(--bd);padding:8px;min-width:280px;box-shadow:0 16px 48px rgba(0,0,0,.06);animation:slideD .15s ease;z-index:200}
+.tab-dd.open .tab-menu{display:block}
+.tab-item{display:block;padding:10px 14px;font-size:12px;color:var(--tx2);transition:all .12s}
+.tab-item:hover{background:var(--bg2);color:var(--tx)}
+.tab-item small{display:block;font-size:10.5px;color:var(--tx3);margin-top:2px}
+.nav-r{margin-left:auto;display:flex;align-items:center;height:100%}
+.nav-cta{font-size:12px;font-weight:600;padding:0 20px;height:100%;display:flex;align-items:center;background:var(--tx);color:var(--txI);transition:background .2s}
+.nav-cta:hover{background:var(--pr)}
+
+/* ========== PAGE CONTAINER ========== */
+.page{display:none}.page.active{display:block}
+
+/* ========== HERO ========== */
+.hero{padding:160px 0 140px}
+.hero-g{display:grid;grid-template-columns:1fr 1fr;gap:100px;align-items:center}
+.hero h1{font-size:44px;font-weight:800;line-height:1.04;letter-spacing:-.04em;margin-bottom:32px}
+.hero h1 em{font-style:normal;color:var(--pr)}
+.hero-d{font-size:14px;color:var(--tx2);max-width:400px;margin-bottom:52px;line-height:1.8}
+.hero-a{display:flex;gap:10px}
+.bp{display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:600;padding:12px 24px;background:var(--tx);color:var(--txI);transition:all .2s}
+.bp:hover{background:var(--pr)}
+.bs{display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:500;padding:12px 24px;border:1px solid var(--bd);color:var(--tx);transition:all .2s}
+.bs:hover{border-color:var(--tx)}
+
+/* Code block */
+.cw{position:relative}
+.cw-glow{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:130%;height:130%;background:radial-gradient(ellipse,rgba(124,58,237,.04) 0%,transparent 70%);pointer-events:none;animation:glow 5s ease-in-out infinite}
+.cb{background:var(--bgC);border:1px solid rgba(255,255,255,.05);overflow:hidden}
+.cb-bar{display:flex;align-items:center;gap:6px;padding:11px 14px;border-bottom:1px solid rgba(255,255,255,.05);font-size:11px;color:rgba(255,255,255,.3)}
+.dot{width:9px;height:9px;border-radius:50%}.dot-r{background:#FF5F57}.dot-y{background:#FEBC2E}.dot-g{background:#28C840}
+.cb-tab{margin-left:10px;padding:2px 8px;background:rgba(255,255,255,.04)}
+.cb-body{padding:20px 18px;font-size:12px;line-height:2.1;color:#52525B;min-height:340px}
+.cl{display:flex;gap:14px;opacity:0;transition:opacity .1s}.cl.on{opacity:1}
+.ln{color:#333;user-select:none;min-width:18px;text-align:right;font-size:11px}
+.kw{color:#C084FC}.fn{color:#A78BFA}.str{color:#86EFAC}.cm{color:#333;font-style:italic}.typ{color:#67E8F9}.pc{color:#52525B}
+.cb-pr{padding:0 18px 16px;border-top:1px solid rgba(255,255,255,.04);padding-top:12px;font-size:12px}
+.ps{color:var(--prM)}.ct{color:#E4E4E7}
+.cur{display:inline-block;width:7px;height:14px;background:var(--prM);animation:blink 1s step-end infinite;vertical-align:text-bottom;margin-left:2px}
+/* SVG behind code */
+.code-svg{position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:0;opacity:.25}
+.code-svg path{stroke-dasharray:500;stroke-dashoffset:500;animation:draw 3.5s ease forwards}
+.code-svg .p1{animation-delay:.6s}.code-svg .p2{animation-delay:1.2s}.code-svg .p3{animation-delay:1.8s}
+.code-svg circle{opacity:0}.code-svg circle.vis{animation:fadeIn .4s ease forwards}
+
+/* ========== LOGO BAR ========== */
+.logos{padding:56px 0;border-top:1px solid var(--bdL);border-bottom:1px solid var(--bdL)}
+.logos-in{display:flex;align-items:center;gap:48px;justify-content:center}
+.logos-label{font-size:10px;letter-spacing:2.5px;text-transform:uppercase;color:var(--tx3);white-space:nowrap;font-weight:500}
+.logos-row{display:flex;align-items:center;gap:44px}
+.logo-img{height:22px;width:auto;opacity:.35;transition:opacity .25s;display:block}
+.logo-img:hover{opacity:.7}
+
+/* ========== SECTION TITLES ========== */
+.sec{padding:160px 0}
+.sec h2{font-size:36px;font-weight:800;letter-spacing:-.04em;margin-bottom:24px;line-height:1.06}
+.sec-d{font-size:14px;color:var(--tx2);max-width:440px;margin-bottom:72px;line-height:1.8}
+
+/* ========== HOW IT WORKS (with arrows) ========== */
+.how-grid{display:grid;grid-template-columns:1fr auto 1fr auto 1fr;gap:0;align-items:stretch}
+.how-card{background:var(--bg3);border:1px solid var(--bd);padding:40px 28px;display:flex;flex-direction:column;transition:background .3s}
+.how-card:hover{background:var(--bg2)}
+.how-card h3{font-size:15px;font-weight:700;margin-bottom:10px}
+.how-card p{font-size:12px;color:var(--tx2);line-height:1.7;margin-bottom:20px;flex:1}
+.how-cb{background:var(--bgC);padding:16px;font-size:11px;color:#52525B;line-height:2;min-height:120px}
+.how-cb .tl{opacity:0;transition:opacity .1s}.how-cb .tl.on{opacity:1}
+.how-arrow{display:flex;align-items:center;justify-content:center;width:48px;flex-shrink:0}
+.how-arrow svg{width:24px;height:24px;color:var(--bd)}
+
+/* ========== BENTO ========== */
+.bento-s{padding:160px 0;background:var(--bg2);border-top:1px solid var(--bdL);border-bottom:1px solid var(--bdL)}
+.bento{display:grid;grid-template-columns:repeat(12,1fr);gap:1px;background:var(--bd)}
+.bc{background:var(--bg3);padding:44px 32px;transition:background .25s;overflow:hidden}
+.bc:hover{background:var(--bg)}
+.bc.s8{grid-column:span 8}.bc.s4{grid-column:span 4}.bc.s6{grid-column:span 6}
+.bc h3{font-size:18px;font-weight:700;margin-bottom:10px;letter-spacing:-.02em}
+.bc h3 span{color:var(--pr)}
+.bc>p{font-size:12.5px;color:var(--tx2);line-height:1.7;max-width:380px}
+.bv{margin-top:24px;background:var(--bgC);padding:20px;font-size:11.5px;color:#52525B;line-height:2;min-height:180px}
+.bv .tl{opacity:0;transition:opacity .1s}.bv .tl.on{opacity:1}
+
+/* ========== PROTOCOL FLOW ========== */
+.pf{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:var(--bd);margin-top:72px}
+.fs{background:var(--bg);padding:44px 24px;transition:background .3s}
+.fs:hover{background:var(--bg3)}
+.fs h4{font-size:14px;font-weight:700;margin-bottom:8px}
+.fs p{font-size:11.5px;color:var(--tx2);line-height:1.6;margin-bottom:14px}
+.ftag{font-size:10px;color:var(--pr);padding:5px 8px;background:var(--prS);display:inline-block;font-weight:500}
+
+/* ========== DOCS SECTION ========== */
+.docs-s{padding:160px 0;background:var(--bgD);color:var(--txI)}
+.docs-s h2{color:var(--txI)}.docs-s .sec-d{color:rgba(255,255,255,.35)}
+.dg{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:rgba(255,255,255,.05)}
+.dc{background:var(--bgD);padding:40px 24px;transition:background .2s}.dc:hover{background:rgba(255,255,255,.02)}
+.dc h3{font-size:14px;font-weight:600;margin-bottom:8px;color:var(--txI)}
+.dc p{font-size:11.5px;color:rgba(255,255,255,.3);line-height:1.55;margin-bottom:18px}
+.dl{font-size:11px;color:var(--prM);display:flex;align-items:center;gap:5px;transition:gap .2s;font-weight:500}.dc:hover .dl{gap:8px}
+
+/* ========== CTA ========== */
+.cta{padding:200px 0;text-align:center}
+.cta h2{font-size:42px;font-weight:800;letter-spacing:-.04em;margin-bottom:28px;line-height:1.04}
+.cta h2 em{font-style:normal;color:var(--pr)}
+.cta-desc{font-size:14px;color:var(--tx2);margin-bottom:60px;max-width:360px;margin-left:auto;margin-right:auto;line-height:1.8}
+.cta-a{display:flex;gap:10px;justify-content:center;margin-bottom:48px}
+.cta-cp{font-size:12px;color:var(--tx3);background:var(--bg3);padding:12px 24px;border:1px solid var(--bd);display:inline-flex;align-items:center;gap:14px;cursor:pointer;transition:all .2s}
+.cta-cp:hover{border-color:var(--tx);color:var(--tx)}
+.cta-cp .h{font-size:9.5px;color:var(--tx3);background:var(--bg);padding:2px 6px;border:1px solid var(--bd)}
+
+/* ========== BLOG PAGE ========== */
+.blog-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--bd);margin-top:60px}
+.blog-card{background:var(--bg);padding:40px 28px;transition:background .2s;display:flex;flex-direction:column}
+.blog-card:hover{background:var(--bg3)}
+.blog-date{font-size:10px;color:var(--tx3);text-transform:uppercase;letter-spacing:1.5px;margin-bottom:16px}
+.blog-card h3{font-size:17px;font-weight:700;letter-spacing:-.02em;margin-bottom:10px;line-height:1.3}
+.blog-card p{font-size:12px;color:var(--tx2);line-height:1.7;flex:1;margin-bottom:16px}
+.blog-link{font-size:11px;color:var(--pr);font-weight:500}
+/* Blog post */
+.post{max-width:720px;margin:0 auto;padding:120px 0 160px}
+.post-back{font-size:11px;color:var(--tx3);margin-bottom:40px;display:inline-block}
+.post-back:hover{color:var(--pr)}
+.post-meta{font-size:10px;color:var(--tx3);text-transform:uppercase;letter-spacing:1.5px;margin-bottom:20px}
+.post h1{font-size:32px;font-weight:800;letter-spacing:-.03em;line-height:1.15;margin-bottom:24px}
+.post-body{font-size:13.5px;color:var(--tx2);line-height:1.9}
+.post-body p{margin-bottom:20px}
+.post-body h2{font-size:20px;font-weight:700;color:var(--tx);margin:48px 0 16px;letter-spacing:-.02em}
+.post-body h3{font-size:16px;font-weight:600;color:var(--tx);margin:32px 0 12px}
+.post-body code{background:var(--bg2);padding:2px 6px;font-size:12px;color:var(--pr)}
+.post-body pre{background:var(--bgC);padding:20px;margin:20px 0;font-size:12px;line-height:1.9;color:#A1A1AA;overflow-x:auto}
+.post-body pre .kw{color:#C084FC}.post-body pre .str{color:#86EFAC}.post-body pre .fn{color:#A78BFA}.post-body pre .cm{color:#444}
+.post-body blockquote{border-left:2px solid var(--pr);padding-left:20px;margin:24px 0;color:var(--tx);font-style:italic}
+.post-body ul{margin:16px 0 16px 20px}.post-body li{margin-bottom:8px}
+
+/* ========== DOCS PAGE ========== */
+.docs-page{display:grid;grid-template-columns:240px 1fr;gap:0;min-height:100vh}
+.docs-nav{background:var(--bg2);border-right:1px solid var(--bd);padding:32px 0;position:sticky;top:56px;height:calc(100vh - 56px);overflow-y:auto}
+.docs-nav-section{padding:0 20px;margin-bottom:24px}
+.docs-nav-title{font-size:10px;text-transform:uppercase;letter-spacing:2px;color:var(--tx3);margin-bottom:12px;font-weight:500}
+.docs-nav-link{display:block;font-size:12px;padding:6px 12px;color:var(--tx2);transition:all .12s;margin-bottom:1px}
+.docs-nav-link:hover{color:var(--tx);background:var(--bg3)}
+.docs-nav-link.active{color:var(--pr);background:var(--prS)}
+.docs-content{padding:48px 56px 120px;max-width:800px;overflow-x:hidden}
+.docs-content h1{font-size:32px;font-weight:800;letter-spacing:-.03em;margin-bottom:12px}
+.docs-content .docs-subtitle{font-size:14px;color:var(--tx2);margin-bottom:40px;line-height:1.7}
+.docs-content h2{font-size:22px;font-weight:700;margin:56px 0 16px;letter-spacing:-.02em;padding-top:24px;border-top:1px solid var(--bdL)}
+.docs-content h3{font-size:16px;font-weight:600;margin:36px 0 12px}
+.docs-content p{font-size:13px;color:var(--tx2);line-height:1.85;margin-bottom:16px}
+.docs-content code{background:var(--bg2);padding:2px 5px;font-size:11.5px;color:var(--pr)}
+.docs-content pre{background:var(--bgC);padding:20px;margin:16px 0 24px;font-size:12px;line-height:1.9;color:#A1A1AA;overflow-x:auto;max-width:100%;white-space:pre-wrap;word-break:break-word}
+.docs-content pre .kw{color:#C084FC}.docs-content pre .str{color:#86EFAC}.docs-content pre .fn{color:#A78BFA}.docs-content pre .cm{color:#444}
+.docs-content table{width:100%;border-collapse:collapse;margin:20px 0;font-size:12px;display:block;overflow-x:auto}
+.docs-content th{text-align:left;padding:10px 14px;background:var(--bg2);border:1px solid var(--bd);font-weight:600;font-size:11px;text-transform:uppercase;letter-spacing:1px;color:var(--tx3)}
+.docs-content td{padding:10px 14px;border:1px solid var(--bd);color:var(--tx2)}
+.docs-content ul,.docs-content ol{margin:12px 0 12px 20px}.docs-content li{margin-bottom:8px;font-size:13px;color:var(--tx2);line-height:1.7}
+.docs-content blockquote{border-left:2px solid var(--pr);padding-left:16px;margin:20px 0;font-style:italic;color:var(--tx)}
+/* Info box */
+.info-box{background:var(--prS);border:1px solid rgba(124,58,237,.15);padding:16px 20px;margin:20px 0;font-size:12px;color:var(--tx);line-height:1.6}
+.info-box strong{color:var(--pr)}
+/* Chart placeholder */
+.chart-placeholder{background:var(--bg2);border:1px solid var(--bd);padding:32px;margin:24px 0;text-align:center}
+.chart-placeholder svg{max-width:100%;height:auto}
+
+/* ========== PRICING PAGE ========== */
+.pricing-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--bd);margin-top:60px}
+.price-card{background:var(--bg);padding:48px 32px;transition:background .2s}
+.price-card:hover{background:var(--bg3)}
+.price-card.featured{background:var(--bgD);color:var(--txI)}
+.price-card.featured:hover{background:#1a1a1a}
+.price-name{font-size:11px;text-transform:uppercase;letter-spacing:2px;color:var(--tx3);margin-bottom:20px;font-weight:500}
+.price-card.featured .price-name{color:var(--prM)}
+.price-amount{font-size:40px;font-weight:800;letter-spacing:-.03em;margin-bottom:8px}
+.price-period{font-size:12px;color:var(--tx3);margin-bottom:28px}
+.price-card.featured .price-period{color:rgba(255,255,255,.4)}
+.price-features{list-style:none;margin-bottom:32px}
+.price-features li{font-size:12px;color:var(--tx2);padding:8px 0;border-bottom:1px solid var(--bdL)}
+.price-card.featured .price-features li{color:rgba(255,255,255,.5);border-color:rgba(255,255,255,.06)}
+.price-btn{display:block;text-align:center;font-size:12px;font-weight:600;padding:12px;border:1px solid var(--bd);color:var(--tx);transition:all .2s}
+.price-btn:hover{background:var(--tx);color:var(--txI)}
+.price-card.featured .price-btn{background:var(--pr);color:#fff;border-color:var(--pr)}
+.price-card.featured .price-btn:hover{background:var(--prM)}
+
+/* ========== FOOTER ========== */
+.ft{background:var(--bgD);color:var(--txI);padding:80px 0 44px;font-size:12px}
+.ft-top{display:grid;grid-template-columns:240px 1fr;gap:80px;padding-bottom:60px;border-bottom:1px solid rgba(255,255,255,.05)}
+.ft-brand p{font-size:12px;color:rgba(255,255,255,.22);line-height:1.7;margin-top:20px}
+.ft-cols{display:grid;grid-template-columns:repeat(4,1fr);gap:40px}
+.ft-ct{color:rgba(255,255,255,.13);font-size:10px;margin-bottom:18px;text-transform:uppercase;letter-spacing:2px;font-weight:500}
+.ft-lk{display:block;color:rgba(255,255,255,.35);padding:4px 0;transition:color .15s;font-size:11.5px}.ft-lk:hover{color:var(--prM)}
+.ft-btm{display:flex;justify-content:space-between;align-items:center;padding-top:36px;color:rgba(255,255,255,.12);font-size:10.5px}
+.ft-bl{display:flex;gap:24px}.ft-bl a{color:rgba(255,255,255,.18);transition:color .15s}.ft-bl a:hover{color:rgba(255,255,255,.5)}
+
+/* ========== HAMBURGER MENU ========== */
+.hamburger{display:none;width:36px;height:36px;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;margin-left:auto}
+.hamburger span{display:block;width:18px;height:1.5px;background:var(--tx);position:relative;transition:all .2s}
+.hamburger span::before,.hamburger span::after{content:'';position:absolute;width:18px;height:1.5px;background:var(--tx);transition:all .2s}
+.hamburger span::before{top:-5px}.hamburger span::after{top:5px}
+.hamburger.open span{background:transparent}
+.hamburger.open span::before{top:0;transform:rotate(45deg)}
+.hamburger.open span::after{top:0;transform:rotate(-45deg)}
+.mobile-menu{display:none;position:fixed;top:56px;left:0;right:0;bottom:0;background:var(--bg);z-index:99;padding:20px;overflow-y:auto;animation:slideD .2s ease}
+.mobile-menu.open{display:block}
+.mobile-menu a{display:block;font-size:14px;padding:14px 0;color:var(--tx2);border-bottom:1px solid var(--bdL);transition:color .15s}
+.mobile-menu a:hover{color:var(--tx)}
+.mobile-menu .mm-cta{display:block;text-align:center;margin-top:20px;padding:14px;background:var(--tx);color:var(--txI);font-weight:600;font-size:13px}
+
+/* ========== RESPONSIVE ========== */
+@media(max-width:960px){
+  .line-bg{display:none}body{padding-left:0}
+  .hero-g{grid-template-columns:1fr;gap:48px}.hero h1{font-size:32px}.hero{padding:80px 0 60px}
+  .how-grid{grid-template-columns:1fr;gap:1px;background:var(--bd)}.how-arrow{display:none}
+  .bc.s8,.bc.s4,.bc.s6{grid-column:span 12}.bento{grid-template-columns:1fr}
+  .pf{grid-template-columns:1fr 1fr}.dg,.blog-grid,.pricing-grid{grid-template-columns:1fr}
+  .sec,.bento-s,.cta{padding:80px 0}
+  .ft-top{grid-template-columns:1fr;gap:40px}.ft-cols{grid-template-columns:repeat(2,1fr)}
+  .nav-tabs{display:none}.n-r{display:none}
+  .hamburger{display:flex}
+  .tab-menu{display:none!important}
+  .docs-page{grid-template-columns:1fr}
+  .docs-nav{position:relative;height:auto;display:block;border-right:none;border-bottom:1px solid var(--bd);padding:16px 0}
+  .docs-nav-section{display:flex;flex-wrap:wrap;gap:4px;padding:0 16px;margin-bottom:8px}
+  .docs-nav-title{width:100%;margin-bottom:4px}
+  .docs-nav-link{font-size:11px;padding:4px 10px}
+  .docs-content{padding:24px 20px 80px;max-width:100%;overflow-x:hidden}
+  .docs-content pre{max-width:100%;overflow-x:auto;font-size:11px;padding:14px}
+  .docs-content table{display:block;overflow-x:auto;max-width:100%}
+  .c{padding:0 20px}
+  .cb-body{min-height:280px;font-size:11px;padding:16px 14px}
+  .bv,.how-cb,.step-cb{font-size:10.5px;padding:14px}
+  .code-svg{display:none}
+}
+@media(max-width:600px){
+  .hero h1{font-size:26px}.sec h2,.cta h2{font-size:24px}
+  .hero-a{flex-direction:column;gap:8px}.cta-a{flex-direction:column;align-items:center;gap:8px}
+  .logos-in{flex-direction:column;gap:16px}.logos-row{flex-wrap:wrap;gap:20px;justify-content:center}
+  .pf{grid-template-columns:1fr}
+  .ft-cols{grid-template-columns:1fr}
+  .ft-btm{flex-direction:column;gap:12px;text-align:center}
+  .cta-cp{flex-direction:column;gap:8px;font-size:11px}
+  .price-amount{font-size:32px}
+}
+</style>
+</head>
+<body>
+
+<!-- LINE NUMBERS BG -->
+<div class="line-bg" id="lineBg"></div>
+
+<!-- NAV -->
+<nav class="nav"><div class="c nav-in">
+  <a class="logo" onclick="go('home')">Pay<span class="logo-toll">Toll</span></a>
+  <div class="nav-tabs">
+    <div class="tab-dd">
+      <a class="nav-tab" onclick="go('home')">product<span class="ext">.ts</span></a>
+      <div class="tab-menu">
+        <a class="tab-item" href="#features" onclick="go('home')">SDK &amp; Middleware<small>Drop-in payment gating</small></a>
+        <a class="tab-item" href="#features" onclick="go('home')">CLI<small>Scaffold and test from terminal</small></a>
+        <a class="tab-item" href="#features" onclick="go('home')">Dashboard<small>Real-time analytics</small></a>
+        <a class="tab-item" href="#protocol" onclick="go('home')">Protocol<small>HTTP 402 flow</small></a>
+        <a class="tab-item" onclick="go('pricing')">Pricing<small>Free &amp; Pro tiers</small></a>
+      </div>
+    </div>
+    <div class="tab-dd">
+      <a class="nav-tab" onclick="go('docs')">developers<span class="ext">.ts</span></a>
+      <div class="tab-menu">
+        <a class="tab-item" onclick="go('docs')">Documentation<small>Full SDK reference</small></a>
+        <a class="tab-item" onclick="go('docs')">Quickstart<small>5-minute guide</small></a>
+        <a class="tab-item" onclick="go('docs')">Examples<small>Working code samples</small></a>
+      </div>
+    </div>
+    <a class="nav-tab" onclick="go('blog')">blog<span class="ext">.md</span></a>
+    <a class="nav-tab" onclick="go('pricing')">pricing<span class="ext">.json</span></a>
+    <a class="nav-tab" href="https://github.com/paytoll" target="_blank">github<span class="ext"> ↗</span></a>
+  </div>
+  <div class="n-r"><a class="nav-cta" onclick="go('docs')">Start building →</a></div>
+  <div class="hamburger" id="hamburger" onclick="toggleMobile()"><span></span></div>
+</div></nav>
+
+<!-- MOBILE MENU -->
+<div class="mobile-menu" id="mobileMenu">
+  <a onclick="go('home');closeMobile()">Product</a>
+  <a onclick="go('docs');closeMobile()">Developers</a>
+  <a onclick="go('blog');closeMobile()">Blog</a>
+  <a onclick="go('pricing');closeMobile()">Pricing</a>
+  <a href="https://github.com/paytoll" target="_blank">GitHub ↗</a>
+  <a class="mm-cta" onclick="go('docs');closeMobile()">Start building →</a>
+</div>
+
+<!-- ==================== HOME PAGE ==================== -->
+<div class="page active" id="page-home">
+
+<!-- HERO -->
+<section class="hero"><div class="c"><div class="hero-g">
+  <div class="rv">
+    <h1>Monetize<br>any API with<br><em>machine<br>payments.</em></h1>
+    <p class="hero-d">Open-source toolkit for accepting payments from AI agents, apps, and humans on Solana. Built on MPP. Ship a paid API in 60 seconds.</p>
+    <div class="hero-a"><a class="bp" onclick="go('docs')">Start building →</a><a href="#how" class="bs">How it works</a></div>
+  </div>
+  <div class="cw rv d2">
+    <div class="cw-glow"></div>
+    <svg class="code-svg" viewBox="0 0 540 440" fill="none">
+      <path class="p1" d="M0 100Q50 100 70 170T140 230" stroke="url(#cg)" stroke-width="1"/>
+      <path class="p2" d="M540 60Q490 60 470 120T400 180" stroke="url(#cg)" stroke-width="1"/>
+      <path class="p3" d="M270 0Q270 50 310 70T340 120" stroke="url(#cg)" stroke-width=".6"/>
+      <circle cx="70" cy="170" r="3" fill="#7C3AED" class="vis" style="animation-delay:2.5s"/>
+      <circle cx="470" cy="120" r="3" fill="#7C3AED" class="vis" style="animation-delay:3s"/>
+      <defs><linearGradient id="cg" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#7C3AED" stop-opacity=".5"/><stop offset="100%" stop-color="#7C3AED" stop-opacity=".03"/></linearGradient></defs>
+    </svg>
+    <div class="cb">
+      <div class="cb-bar"><span class="dot dot-r"></span><span class="dot dot-y"></span><span class="dot dot-g"></span><span class="cb-tab">paytoll.config.ts</span></div>
+      <div class="cb-body" data-typed>
+        <div class="cl"><span class="ln"> 1</span><span class="cm">// paytoll.config.ts</span></div>
+        <div class="cl"><span class="ln"> 2</span><span><span class="kw">import</span> { defineConfig } <span class="kw">from</span> <span class="str">'@paytoll/sdk'</span></span></div>
+        <div class="cl"><span class="ln"> 3</span><span></span></div>
+        <div class="cl"><span class="ln"> 4</span><span><span class="kw">export default</span> <span class="fn">defineConfig</span><span class="pc">({</span></span></div>
+        <div class="cl"><span class="ln"> 5</span><span>  <span class="typ">recipient</span>: <span class="str">'So1ana...Wa11et'</span>,</span></div>
+        <div class="cl"><span class="ln"> 6</span><span>  <span class="typ">network</span>: <span class="str">'mainnet-beta'</span>,</span></div>
+        <div class="cl"><span class="ln"> 7</span><span>  <span class="typ">endpoints</span>: [</span></div>
+        <div class="cl"><span class="ln"> 8</span><span>    {</span></div>
+        <div class="cl"><span class="ln"> 9</span><span>      <span class="typ">path</span>: <span class="str">'/api/search'</span>,</span></div>
+        <div class="cl"><span class="ln">10</span><span>      <span class="typ">price</span>: <span class="str">'0.01'</span>,</span></div>
+        <div class="cl"><span class="ln">11</span><span>      <span class="typ">currency</span>: <span class="str">'USDC'</span>,</span></div>
+        <div class="cl"><span class="ln">12</span><span>      <span class="typ">mode</span>: <span class="str">'charge'</span></span></div>
+        <div class="cl"><span class="ln">13</span><span>    }</span></div>
+        <div class="cl"><span class="ln">14</span><span>  ]</span></div>
+        <div class="cl"><span class="ln">15</span><span>})</span></div>
+      </div>
+      <div class="cb-pr"><span class="ps">$</span> <span class="ct">npx paytoll dev</span><span class="cur"></span></div>
+    </div>
+  </div>
+</div></div></section>
+
+<!-- LOGOS -->
+<section class="logos"><div class="c"><div class="logos-in">
+  <span class="logos-label">Built on</span>
+  <div class="logos-row">
+    <img src="assets/solana.png" alt="Solana" class="logo-img">
+    <img src="assets/stripe.png" alt="Stripe" class="logo-img">
+  </div>
+</div></div></section>
+
+<!-- HOW IT WORKS -->
+<section class="sec" id="how"><div class="c">
+  <div class="rv"><h2>How it works</h2><p class="sec-d">PayToll wraps the Solana MPP SDK into middleware. Define endpoints, set prices, deploy. Three steps.</p></div>
+  <div class="how-grid rv d1">
+    <div class="how-card">
+      <h3>Install &amp; configure</h3>
+      <p>Add PayToll to any Node.js project. Define which endpoints cost money.</p>
+      <div class="how-cb" data-typed><div class="tl"><span class="ps">$</span> <span class="ct">npm install @paytoll/sdk</span></div><div class="tl"><span class="ps">$</span> <span class="ct">npx paytoll init</span></div><div class="tl"></div><div class="tl"><span style="color:#86EFAC">✓</span> Created paytoll.config.ts</div><div class="tl"><span style="color:#86EFAC">✓</span> Ready to configure</div></div>
+    </div>
+    <div class="how-arrow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M5 12h14m-4-4l4 4-4 4"/></svg></div>
+    <div class="how-card">
+      <h3>Add middleware</h3>
+      <p>Three lines. 402 challenges, verification, fee sponsorship, receipts — all handled.</p>
+      <div class="how-cb" data-typed><div class="tl"><span class="kw">import</span> { paytoll }</div><div class="tl">  <span class="kw">from</span> <span class="str">'@paytoll/sdk'</span></div><div class="tl"></div><div class="tl">app.<span class="fn">use</span>(<span class="fn">paytoll</span>(config))</div><div class="tl"></div><div class="tl"><span class="cm">// Every route is now gated</span></div></div>
+    </div>
+    <div class="how-arrow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M5 12h14m-4-4l4 4-4 4"/></svg></div>
+    <div class="how-card">
+      <h3>Ship &amp; earn</h3>
+      <p>Deploy anywhere Node runs. Monitor payments via dashboard.</p>
+      <div class="how-cb" data-typed><div class="tl"><span class="ps">$</span> <span class="ct">npx paytoll dev</span></div><div class="tl"></div><div class="tl"><span style="color:#86EFAC">✓</span> Server on :3000</div><div class="tl"><span style="color:#86EFAC">✓</span> 3 endpoints gated</div><div class="tl"><span style="color:#86EFAC">✓</span> Dashboard on :3001</div></div>
+    </div>
+  </div>
+</div></section>
+
+<!-- FEATURES -->
+<section class="bento-s" id="features"><div class="c">
+  <div class="rv"><h2>Features</h2><p class="sec-d">Everything to turn any API into a paid service. Open source. Free forever.</p></div>
+  <div class="bento rv d1">
+    <div class="bc s8">
+      <h3>Drop-in payment gating <span>→</span></h3>
+      <p>Express, Hono, Next.js middleware. Charge mode for one-time. Session mode for streaming metered access.</p>
+      <div class="bv" data-typed><div class="tl"><span class="cm">// Express — gate any endpoint</span></div><div class="tl"><span class="kw">import</span> { paytoll } <span class="kw">from</span> <span class="str">'@paytoll/sdk'</span></div><div class="tl"></div><div class="tl">app.<span class="fn">use</span>(<span class="str">'/api/search'</span>, <span class="fn">paytoll</span>({</div><div class="tl">  price: <span class="str">'0.01'</span>,</div><div class="tl">  currency: <span class="str">'USDC'</span>,</div><div class="tl">  mode: <span class="str">'charge'</span></div><div class="tl">}))</div></div>
+    </div>
+    <div class="bc s4">
+      <h3>Terminal-first CLI <span>→</span></h3>
+      <p>Scaffold, test, simulate, monitor from terminal.</p>
+      <div class="bv" data-typed><div class="tl"><span class="ps">$</span> <span class="ct">paytoll init</span></div><div class="tl"><span class="ps">$</span> <span class="ct">paytoll dev</span></div><div class="tl"><span class="ps">$</span> <span class="ct">paytoll test</span></div><div class="tl"></div><div class="tl"><span style="color:#86EFAC">Revenue:</span>  $4.27</div><div class="tl"><span style="color:#86EFAC">Sessions:</span> 12</div></div>
+    </div>
+    <div class="bc s4"><h3>Real-time dashboard <span>→</span></h3><p>Self-hosted Next.js. Revenue charts, tx feed with Solana explorer links, active sessions.</p></div>
+    <div class="bc s4"><h3>Charge &amp; Session <span>→</span></h3><p>One-time per call. Streaming payment channels for metered, sub-cent access. Fee sponsorship.</p></div>
+    <div class="bc s4"><h3>MIT Licensed. Free. <span>→</span></h3><p>Entire toolkit open source. Self-host everything. No vendor lock-in. Fork it, build on it.</p></div>
+  </div>
+</div></section>
+
+<!-- PROTOCOL -->
+<section class="sec" id="protocol"><div class="c">
+  <div class="rv"><h2>HTTP 402 — the way payments<br>were supposed to work.</h2><p class="sec-d">Reserved since 1997, never standardized until now. PayToll implements the Solana payment method for this IETF-submitted open standard.</p></div>
+  <div class="pf rv d1">
+    <div class="fs"><h4>Agent requests</h4><p>AI agent sends a standard HTTP request to your paid endpoint.</p><div class="ftag">GET /api/search</div></div>
+    <div class="fs"><h4>402 Challenge</h4><p>Server returns 402 with payment details — amount, currency, recipient.</p><div class="ftag">402 Payment Required</div></div>
+    <div class="fs"><h4>Agent pays</h4><p>Agent signs a Solana transaction. Submits proof of payment.</p><div class="ftag">Authorization: Payment</div></div>
+    <div class="fs"><h4>Access granted</h4><p>Server verifies on-chain. Returns resource with receipt.</p><div class="ftag">200 OK + Receipt</div></div>
+  </div>
+</div></section>
+
+<!-- BUILD/DOCS -->
+<section class="docs-s" id="build"><div class="c">
+  <div class="rv"><h2>Everything you need<br>to get started.</h2><p class="sec-d">Documentation, quickstart guides, working examples.</p></div>
+  <div class="dg rv d1">
+    <a class="dc" onclick="go('docs');setTimeout(()=>scrollToDoc('quickstart'),100)"><h3>Quickstart</h3><p>Zero to paid API in under 5 minutes. Includes Surfpool testing.</p><span class="dl">Get started →</span></a>
+    <a class="dc" onclick="go('docs');setTimeout(()=>scrollToDoc('charge'),100)"><h3>Guides</h3><p>Express, Sessions, fee sponsorship, Next.js integration.</p><span class="dl">Read guides →</span></a>
+    <a class="dc" onclick="go('docs');setTimeout(()=>scrollToDoc('config'),100)"><h3>API Reference</h3><p>Full SDK docs. Config, middleware, CLI, TypeScript types.</p><span class="dl">View reference →</span></a>
+    <a class="dc" onclick="go('docs');setTimeout(()=>scrollToDoc('examples'),100)"><h3>Examples</h3><p>Weather API, stock quotes, AI inference, MCP tools.</p><span class="dl">See examples →</span></a>
+    <a class="dc" href="https://github.com/paytoll" target="_blank"><h3>GitHub</h3><p>Source code, issues, PRs. MIT licensed.</p><span class="dl">View source →</span></a>
+    <a class="dc" href="https://mpp.dev" target="_blank"><h3>MPP Spec</h3><p>Machine Payments Protocol. IETF draft.</p><span class="dl">Read spec →</span></a>
+  </div>
+</div></section>
+
+<!-- CTA -->
+<section class="cta"><div class="c"><div class="rv">
+  <h2>Your API should<br><em>make money.</em></h2>
+  <p class="cta-desc">Install PayToll. Define prices. Deploy.<br>Agents pay you directly.</p>
+  <div class="cta-a"><a class="bp" onclick="go('docs')">Read the docs →</a><a href="https://github.com/paytoll" class="bs">View on GitHub</a></div>
+  <div class="cta-cp" onclick="navigator.clipboard.writeText('npm install @paytoll/sdk')"><span>$ npm install @paytoll/sdk</span><span class="h">copy</span></div>
+</div></div></section>
+
+</div><!-- /home -->
+
+<!-- ==================== BLOG PAGE ==================== -->
+<div class="page" id="page-blog">
+<section class="sec"><div class="c">
+  <div class="rv"><h2>Blog</h2><p class="sec-d">Thoughts on machine payments, agent economics, and building in the open.</p></div>
+  <div class="blog-grid rv d1">
+    <div class="blog-card" onclick="go('post1')" style="cursor:pointer">
+      <div class="blog-date">March 23, 2026</div>
+      <h3>Why HTTP 402 is finally happening — and what it means for developers</h3>
+      <p>The status code reserved in 1997 for "Payment Required" was never standardized. Stripe and Tempo just changed that with MPP. Here's why it matters and how PayToll fits in.</p>
+      <span class="blog-link">Read post →</span>
+    </div>
+    <div class="blog-card" onclick="go('post2')" style="cursor:pointer">
+      <div class="blog-date">March 22, 2026</div>
+      <h3>The agent economy needs infrastructure, not more agents</h3>
+      <p>Everyone is building AI agents. Almost nobody is building the payment rails they need. We looked at 41 hackathon projects and found a massive gap.</p>
+      <span class="blog-link">Read post →</span>
+    </div>
+    <div class="blog-card" onclick="go('post3')" style="cursor:pointer">
+      <div class="blog-date">March 21, 2026</div>
+      <h3>Building PayToll: from Solana Foundation research to open-source launch</h3>
+      <p>How we went from auditing 61 Solana Foundation repos to building the first developer toolkit for machine payments. A build log.</p>
+      <span class="blog-link">Read post →</span>
+    </div>
+  </div>
+</div></section>
+</div>
+
+<!-- ==================== BLOG POST 1 ==================== -->
+<div class="page" id="page-post1">
+<div class="post"><div class="c">
+  <a class="post-back" onclick="go('blog')">← Back to blog</a>
+  <div class="post-meta">March 23, 2026 · 6 min read</div>
+  <h1>Why HTTP 402 is finally happening — and what it means for developers</h1>
+  <div class="post-body">
+    <p>HTTP 402 Payment Required has existed since 1997. It was reserved in the original HTTP/1.1 spec with a note that said "reserved for future use." For 29 years, that future never came. Until five days ago.</p>
+    <p>On March 18, 2026, Stripe and Tempo Labs jointly launched the Machine Payments Protocol (MPP) — an open standard that finally gives HTTP 402 a real specification. It was submitted to the IETF. Visa, Anthropic, OpenAI, Mastercard, and Shopify have already integrated. Over 100 services launched in the MPP directory on day one.</p>
+    <h2>What MPP actually does</h2>
+    <p>The core idea is elegant. When an AI agent (or any HTTP client) requests a resource that costs money, the server responds with <code>402 Payment Required</code> and a challenge describing the payment needed — amount, currency, recipient wallet. The client fulfils the payment, retries with proof, and gets access.</p>
+    <blockquote>Think of it as OAuth for money. Authenticate once, transact programmatically within defined limits.</blockquote>
+    <p>There are two payment modes. <strong>Charge</strong> is one-time: pay per request, like buying a single API call. <strong>Session</strong> is streaming: open a payment channel, deposit funds upfront, and the agent consumes resources with micropayments settling continuously. Thousands of small transactions aggregate into a single on-chain settlement.</p>
+    <h2>Why it matters for developers</h2>
+    <p>Right now, if you want to monetize an API, you need Stripe billing, API key management, a signup flow, a dashboard for customers, webhook handlers, and probably a dozen other things. The overhead is enormous for what should be a simple operation: "give me data, I'll give you money."</p>
+    <p>MPP collapses all of that into the HTTP layer itself. No signup. No API keys. No billing portal. The payment IS the authentication. An agent with a funded wallet can use any MPP-enabled service instantly — the same way a browser fetches any public webpage.</p>
+    <h2>Where PayToll fits</h2>
+    <p>MPP defines the protocol. The Solana Foundation has an SDK (<code>@solana/mpp</code>) that implements it. But there's a gap between "here's an SDK" and "my API accepts payments." That gap is developer experience — the middleware, the CLI, the dashboard, the testing tools.</p>
+    <p>PayToll fills that gap. Three lines of code to gate any Express, Hono, or Next.js endpoint. A CLI to scaffold and test. A dashboard to monitor revenue. All open source, all free.</p>
+    <p>We think this is the beginning of a new class of web service — APIs that are paid by default, used by machines, and accessible to anyone with a wallet. No accounts. No contracts. Just HTTP and money.</p>
+  </div>
+</div></div>
+</div>
+
+<!-- ==================== BLOG POST 2 ==================== -->
+<div class="page" id="page-post2">
+<div class="post"><div class="c">
+  <a class="post-back" onclick="go('blog')">← Back to blog</a>
+  <div class="post-meta">March 22, 2026 · 5 min read</div>
+  <h1>The agent economy needs infrastructure, not more agents</h1>
+  <div class="post-body">
+    <p>Tempo ran a hackathon last week. 41 teams built projects on MPP. We studied every single one. The pattern was striking: almost every project built an agent that pays for things. Almost nobody built the tools that let you get paid.</p>
+    <h2>The demand/supply imbalance</h2>
+    <p>The agent side is crowded. There are agents ordering flowers, agents doing deep research, agents trading DeFi, agents playing games with micropayments. The infrastructure side? Nearly empty.</p>
+    <p>A few projects touched infrastructure — a reverse proxy for micropayments, an API gateway wrapper, a reputation scoring system. But nobody built the "create-react-app for MPP" — the developer-first toolkit that makes it trivially easy to create a paid API.</p>
+    <h2>Supply creates its own demand</h2>
+    <p>Every new paid API endpoint is a new service an agent can consume. The more services available through MPP, the more useful agents become. The more useful agents become, the more demand there is for services. It's a flywheel — but right now, the supply side is stuck because the tooling doesn't exist.</p>
+    <h2>What we're building</h2>
+    <p>PayToll is supply-side infrastructure. We make it trivially easy to turn any existing API into a paid MPP service. Install a package, define your prices in a config file, deploy. Your API now accepts payments from any agent, app, or human with a Solana wallet.</p>
+    <p>The protocol exists. The demand is building. What's missing is the developer experience that turns "I have an API" into "agents pay to use my API." That's the entire product.</p>
+  </div>
+</div></div>
+</div>
+
+<!-- ==================== BLOG POST 3 ==================== -->
+<div class="page" id="page-post3">
+<div class="post"><div class="c">
+  <a class="post-back" onclick="go('blog')">← Back to blog</a>
+  <div class="post-meta">March 21, 2026 · 7 min read</div>
+  <h1>Building PayToll: from Solana Foundation research to open-source launch</h1>
+  <div class="post-body">
+    <p>This is a build log. How we went from zero to shipping the first developer toolkit for machine payments on Solana.</p>
+    <h2>The research phase</h2>
+    <p>It started with an audit of the Solana Foundation's GitHub. All 61 repositories. We mapped every active project, identified gaps, and looked for where developer tooling was missing around their newest initiatives.</p>
+    <p>Three things jumped out. First, the MPP SDK (<code>@solana/mpp</code>) had just been published — 35 stars, 3 contributors, actively maintained. Second, Surfpool (their local dev environment) was their most-starred new tool at 524 stars. Third, their solana-dev-skill repo (Claude Code skill for Solana) had 403 stars, signaling a clear bet on AI-assisted development.</p>
+    <h2>Finding the gap</h2>
+    <p>The MPP SDK exists, but there's no developer platform around it. No middleware package. No CLI. No dashboard. No testing tools. If you want to build an MPP-enabled API today, you're reading raw SDK source code and wiring everything together yourself.</p>
+    <p>Meanwhile, Tempo's hackathon had 41 projects — overwhelmingly agent-side. The supply-side toolkit was completely missing.</p>
+    <h2>The stack</h2>
+    <p>We chose a stack that matches the Solana developer ecosystem: TypeScript throughout, <code>@solana/mpp</code> as the core dependency, Surfpool for local testing, Helius for transaction indexing, Next.js for the dashboard. Everything MIT licensed.</p>
+    <h2>What's next</h2>
+    <p>Week 1 was the middleware and CLI. Week 2 is the dashboard. Week 3 adds Session mode support. Week 4 is docs, examples, and launch content. We're building in the open — every commit is on GitHub. Follow along.</p>
+  </div>
+</div></div>
+</div>
+
+<!-- ==================== DOCS PAGE ==================== -->
+<div class="page" id="page-docs">
+<div class="docs-page">
+  <nav class="docs-nav">
+    <div class="docs-nav-section">
+      <div class="docs-nav-title">Getting Started</div>
+      <a class="docs-nav-link active" onclick="scrollToDoc('overview')">Overview</a>
+      <a class="docs-nav-link" onclick="scrollToDoc('quickstart')">Quickstart</a>
+      <a class="docs-nav-link" onclick="scrollToDoc('config')">Configuration</a>
+    </div>
+    <div class="docs-nav-section">
+      <div class="docs-nav-title">Core Concepts</div>
+      <a class="docs-nav-link" onclick="scrollToDoc('charge')">Charge Mode</a>
+      <a class="docs-nav-link" onclick="scrollToDoc('session')">Session Mode</a>
+      <a class="docs-nav-link" onclick="scrollToDoc('security')">Security Model</a>
+    </div>
+    <div class="docs-nav-section">
+      <div class="docs-nav-title">SDK Reference</div>
+      <a class="docs-nav-link" onclick="scrollToDoc('cli')">CLI Commands</a>
+      <a class="docs-nav-link" onclick="scrollToDoc('examples')">Examples</a>
+    </div>
+  </nav>
+  <div class="docs-content" id="docsContent">
+    <h1>PayToll Documentation</h1>
+    <p class="docs-subtitle">The open-source developer toolkit for machine payments on Solana. Everything you need to monetize any API using the Machine Payments Protocol.</p>
+
+    <div class="info-box"><strong>Note:</strong> PayToll is in active development. The MPP spec is not yet finalized — APIs and wire formats are subject to change. Follow our GitHub for updates.</div>
+
+    <h2 id="doc-overview">Overview</h2>
+    <p>PayToll is a TypeScript toolkit that wraps the Solana Foundation's <code>@solana/mpp</code> SDK into production-ready middleware, CLI tools, and a monitoring dashboard. It enables any Node.js API to accept payments from AI agents, applications, and humans using the HTTP 402 Payment Required flow.</p>
+
+    <h3>Architecture</h3>
+    <pre><span class="cm">// PayToll Architecture</span>
+
+┌─────────────────────────────────────────┐
+│           Your API Server               │
+│                                         │
+│  ┌─────────────┐  ┌─────────────────┐  │
+│  │  PayToll    │  │  Your Handlers  │  │
+│  │  Middleware  │→ │  (business      │  │
+│  │             │  │   logic)        │  │
+│  └──────┬──────┘  └─────────────────┘  │
+│         │                               │
+│  ┌──────▼──────┐                        │
+│  │  @solana/   │                        │
+│  │  mpp SDK    │                        │
+│  └──────┬──────┘                        │
+│         │                               │
+└─────────┼───────────────────────────────┘
+          │
+    ┌─────▼─────┐
+    │  Solana   │
+    │  Network  │
+    └───────────┘</pre>
+
+    <h3>Key Concepts</h3>
+    <table>
+      <thead><tr><th>Concept</th><th>Description</th></tr></thead>
+      <tbody>
+        <tr><td><code>Charge</code></td><td>One-time payment per request. Client pays, gets access to a single response. Best for discrete API calls.</td></tr>
+        <tr><td><code>Session</code></td><td>Streaming payment channel. Client deposits funds upfront, consumes resources with micropayments. Best for metered/streaming access.</td></tr>
+        <tr><td><code>402 Challenge</code></td><td>Server response describing what payment is needed — amount, currency, recipient. The client fulfils this to get access.</td></tr>
+        <tr><td><code>Credential</code></td><td>Proof of payment sent by the client in the Authorization header. Contains the signed Solana transaction.</td></tr>
+        <tr><td><code>Receipt</code></td><td>Server response header confirming payment was verified and access is granted.</td></tr>
+        <tr><td><code>Fee Sponsorship</code></td><td>Server pays Solana transaction fees on behalf of the client. Client only pays the transfer amount.</td></tr>
+      </tbody>
+    </table>
+
+    <h2 id="doc-quickstart">Quickstart</h2>
+    <p>Get a paid API running locally in under 5 minutes.</p>
+
+    <h3>Prerequisites</h3>
+    <ul>
+      <li>Node.js 20+</li>
+      <li>A Solana wallet (for receiving payments)</li>
+      <li>Surfpool (for local testing) — <code>curl -fsSL https://run.surfpool.run | sh</code></li>
+    </ul>
+
+    <h3>Step 1: Install</h3>
+    <pre><span class="ps">$</span> npm install @paytoll/sdk
+<span class="ps">$</span> npx paytoll init</pre>
+    <p>This creates a <code>paytoll.config.ts</code> file in your project root.</p>
+
+    <h3>Step 2: Configure</h3>
+    <pre><span class="cm">// paytoll.config.ts</span>
+<span class="kw">import</span> { defineConfig } <span class="kw">from</span> <span class="str">'@paytoll/sdk'</span>
+
+<span class="kw">export default</span> <span class="fn">defineConfig</span>({
+  recipient: <span class="str">'YOUR_SOLANA_WALLET_ADDRESS'</span>,
+  network: <span class="str">'devnet'</span>,
+  endpoints: [
+    {
+      path: <span class="str">'/api/search'</span>,
+      price: <span class="str">'0.01'</span>,
+      currency: <span class="str">'USDC'</span>,
+      mode: <span class="str">'charge'</span>
+    }
+  ]
+})</pre>
+
+    <h3>Step 3: Add middleware</h3>
+    <pre><span class="cm">// server.ts</span>
+<span class="kw">import</span> express <span class="kw">from</span> <span class="str">'express'</span>
+<span class="kw">import</span> { paytoll } <span class="kw">from</span> <span class="str">'@paytoll/sdk/express'</span>
+<span class="kw">import</span> config <span class="kw">from</span> <span class="str">'./paytoll.config'</span>
+
+<span class="kw">const</span> app = <span class="fn">express</span>()
+app.<span class="fn">use</span>(<span class="fn">paytoll</span>(config))
+
+app.<span class="fn">get</span>(<span class="str">'/api/search'</span>, (req, res) => {
+  <span class="cm">// This only runs after payment is verified</span>
+  res.<span class="fn">json</span>({ results: [<span class="str">'result1'</span>, <span class="str">'result2'</span>] })
+})
+
+app.<span class="fn">listen</span>(3000)</pre>
+
+    <h3>Step 4: Test locally</h3>
+    <pre><span class="cm"># Terminal 1: Start Surfpool</span>
+<span class="ps">$</span> surfpool start
+
+<span class="cm"># Terminal 2: Start your server</span>
+<span class="ps">$</span> npx paytoll dev
+
+<span class="cm"># Terminal 3: Test with built-in client</span>
+<span class="ps">$</span> npx paytoll test /api/search</pre>
+
+    <h2 id="doc-config">Configuration Reference</h2>
+    <table>
+      <thead><tr><th>Option</th><th>Type</th><th>Default</th><th>Description</th></tr></thead>
+      <tbody>
+        <tr><td><code>recipient</code></td><td>string</td><td>—</td><td>Solana wallet address for receiving payments (required)</td></tr>
+        <tr><td><code>network</code></td><td>string</td><td><code>'devnet'</code></td><td><code>'devnet'</code> | <code>'mainnet-beta'</code></td></tr>
+        <tr><td><code>endpoints</code></td><td>array</td><td><code>[]</code></td><td>Array of endpoint configurations</td></tr>
+        <tr><td><code>feePayer</code></td><td>string?</td><td>—</td><td>Base58 keypair for fee sponsorship (optional)</td></tr>
+        <tr><td><code>rpcUrl</code></td><td>string?</td><td>auto</td><td>Custom Solana RPC endpoint</td></tr>
+        <tr><td><code>secretKey</code></td><td>string?</td><td>auto</td><td>HMAC key for signing 402 challenges</td></tr>
+      </tbody>
+    </table>
+
+    <h3>Endpoint Configuration</h3>
+    <table>
+      <thead><tr><th>Option</th><th>Type</th><th>Description</th></tr></thead>
+      <tbody>
+        <tr><td><code>path</code></td><td>string</td><td>URL path to gate (e.g. <code>'/api/search'</code>)</td></tr>
+        <tr><td><code>price</code></td><td>string</td><td>Amount to charge (e.g. <code>'0.01'</code> for 1 cent)</td></tr>
+        <tr><td><code>currency</code></td><td>string</td><td><code>'USDC'</code> | <code>'SOL'</code> | SPL token mint address</td></tr>
+        <tr><td><code>mode</code></td><td>string</td><td><code>'charge'</code> (one-time) | <code>'session'</code> (streaming)</td></tr>
+        <tr><td><code>meter</code></td><td>string?</td><td>For session mode: meter name (e.g. <code>'api_calls'</code>)</td></tr>
+      </tbody>
+    </table>
+
+    <h2 id="doc-charge">Charge Mode</h2>
+    <p>Charge mode implements one-time payments. Each request requires a separate payment. The flow is:</p>
+    <pre>Client → GET /api/search
+Server → 402 { amount: "0.01", currency: "USDC", recipient: "..." }
+Client → [signs Solana tx, sends USDC]
+Client → GET /api/search + Authorization: Payment [credential]
+Server → [verifies tx on-chain] → 200 { results: [...] }</pre>
+
+    <h2 id="doc-session">Session Mode</h2>
+    <p>Session mode implements streaming payment channels using voucher-based micropayments. The client opens a channel with a deposit, then sends updated vouchers with each request. The cumulative amount increases monotonically.</p>
+    <pre>Client → GET /api/stream
+Server → 402 { mode: "session", deposit: "1.00", pricing: {...} }
+Client → [opens channel, deposits 1.00 USDC]
+Client → GET /api/stream + Authorization: Payment [voucher: 0.01]
+Server → 200 { data: "chunk 1" }
+Client → GET /api/stream + Authorization: Payment [voucher: 0.02]
+Server → 200 { data: "chunk 2" }
+...
+Client → POST /close-session
+Server → [settles on-chain with final voucher]</pre>
+
+    <h2 id="doc-security">Security Model</h2>
+    <p>PayToll's security model builds on Solana's cryptographic guarantees.</p>
+    <ul>
+      <li><strong>Replay protection:</strong> Each transaction signature can only be used once. PayToll tracks consumed signatures to prevent replay attacks.</li>
+      <li><strong>HMAC challenges:</strong> 402 challenges are signed with an HMAC secret key. Clients cannot forge or modify challenges.</li>
+      <li><strong>On-chain verification:</strong> Every payment is verified on the Solana blockchain before access is granted. No trust assumptions.</li>
+      <li><strong>Transaction simulation:</strong> Transactions are simulated before broadcast to prevent wasted fees from invalid payments.</li>
+      <li><strong>Session nonces:</strong> Voucher-based sessions use monotonic counters that prevent double-spending within a channel.</li>
+    </ul>
+
+    <h2 id="doc-cli">CLI Commands</h2>
+    <table>
+      <thead><tr><th>Command</th><th>Description</th></tr></thead>
+      <tbody>
+        <tr><td><code>paytoll init</code></td><td>Create a paytoll.config.ts file in the current directory</td></tr>
+        <tr><td><code>paytoll dev</code></td><td>Start dev server with Surfpool integration + dashboard</td></tr>
+        <tr><td><code>paytoll test [path]</code></td><td>Simulate an agent payment against an endpoint</td></tr>
+        <tr><td><code>paytoll status</code></td><td>Show revenue, active sessions, endpoint health</td></tr>
+        <tr><td><code>paytoll build</code></td><td>Build for production deployment</td></tr>
+      </tbody>
+    </table>
+
+    <h2 id="doc-examples">Examples</h2>
+    <p>Working example servers you can clone and run immediately.</p>
+
+    <h3>Weather API</h3>
+    <p>A simple Express server that charges 0.01 USDC per weather lookup.</p>
+    <pre><span class="cm">// examples/weather/server.ts</span>
+<span class="kw">import</span> express <span class="kw">from</span> <span class="str">'express'</span>
+<span class="kw">import</span> { paytoll } <span class="kw">from</span> <span class="str">'@paytoll/sdk/express'</span>
+
+<span class="kw">const</span> app = <span class="fn">express</span>()
+
+app.<span class="fn">use</span>(<span class="str">'/api/weather'</span>, <span class="fn">paytoll</span>({
+  price: <span class="str">'0.01'</span>,
+  currency: <span class="str">'USDC'</span>,
+  mode: <span class="str">'charge'</span>
+}))
+
+app.<span class="fn">get</span>(<span class="str">'/api/weather/:city'</span>, <span class="kw">async</span> (req, res) => {
+  <span class="kw">const</span> data = <span class="kw">await</span> <span class="fn">fetchWeather</span>(req.params.city)
+  res.<span class="fn">json</span>(data)
+})
+
+app.<span class="fn">listen</span>(3000)</pre>
+
+    <h3>AI Inference</h3>
+    <p>Session-mode endpoint for metered AI model access — pay per token.</p>
+    <pre><span class="cm">// examples/inference/server.ts</span>
+app.<span class="fn">use</span>(<span class="str">'/api/generate'</span>, <span class="fn">paytoll</span>({
+  price: <span class="str">'0.001'</span>,
+  currency: <span class="str">'USDC'</span>,
+  mode: <span class="str">'session'</span>,
+  meter: <span class="str">'tokens'</span>
+}))</pre>
+
+    <h3>MCP Tool Monetization</h3>
+    <p>Wrap any MCP server tool with PayToll to charge per tool call.</p>
+    <pre><span class="cm">// examples/mcp-tool/server.ts</span>
+<span class="cm">// Gate MCP tool calls via MPP's JSON-RPC transport</span>
+app.<span class="fn">use</span>(<span class="str">'/mcp'</span>, <span class="fn">paytoll</span>({
+  price: <span class="str">'0.05'</span>,
+  currency: <span class="str">'USDC'</span>,
+  mode: <span class="str">'charge'</span>
+}))</pre>
+
+  </div>
+</div>
+</div>
+
+<!-- ==================== PRICING PAGE ==================== -->
+<div class="page" id="page-pricing">
+<section class="sec"><div class="c">
+  <div class="rv"><h2>Pricing</h2><p class="sec-d">PayToll is free and open source. Self-host everything at zero cost. The hosted gateway takes a small percentage of transaction volume — we only earn when you earn.</p></div>
+  <div class="pricing-grid rv d1">
+    <div class="price-card">
+      <div class="price-name">Self-Hosted</div>
+      <div class="price-amount">Free</div>
+      <div class="price-period">forever · 0% fees</div>
+      <ul class="price-features">
+        <li>Full SDK &amp; middleware</li>
+        <li>CLI tools</li>
+        <li>Self-hosted dashboard</li>
+        <li>Local testing (Surfpool)</li>
+        <li>Charge &amp; Session modes</li>
+        <li>Unlimited endpoints</li>
+        <li>Unlimited transaction volume</li>
+        <li>MIT licensed source code</li>
+        <li>Community support (GitHub)</li>
+      </ul>
+      <a class="price-btn" onclick="go('docs')">Get started →</a>
+    </div>
+    <div class="price-card featured">
+      <div class="price-name">Hosted Gateway</div>
+      <div class="price-amount">0.5%</div>
+      <div class="price-period">of transaction volume · coming soon</div>
+      <ul class="price-features">
+        <li>Everything in Self-Hosted</li>
+        <li>Managed dashboard (no deploy)</li>
+        <li>Webhook notifications</li>
+        <li>Slack / Discord alerts</li>
+        <li>Advanced analytics</li>
+        <li>Multi-wallet support</li>
+        <li>Custom RPC endpoints</li>
+        <li>Priority support</li>
+        <li>No monthly fees — pay only on volume</li>
+      </ul>
+      <a class="price-btn" href="javascript:void(0)">Join waitlist →</a>
+    </div>
+    <div class="price-card">
+      <div class="price-name">Enterprise</div>
+      <div class="price-amount">Custom</div>
+      <div class="price-period">volume discounts available</div>
+      <ul class="price-features">
+        <li>Everything in Hosted</li>
+        <li>Dedicated infrastructure</li>
+        <li>SLA guarantees</li>
+        <li>Custom integrations</li>
+        <li>On-call engineering support</li>
+        <li>Compliance reporting</li>
+        <li>White-label option</li>
+        <li>Reduced fee at scale</li>
+        <li>SOC 2 available</li>
+      </ul>
+      <a class="price-btn" href="javascript:void(0)">Contact us →</a>
+    </div>
+  </div>
+  <div style="text-align:center;margin-top:60px;max-width:500px;margin-left:auto;margin-right:auto">
+    <p style="font-size:13px;color:var(--tx2);line-height:1.8">Self-hosting is always free with zero fees. The 0.5% hosted fee only applies if you choose the managed gateway — and you can switch to self-hosted at any time. No lock-in. Your keys, your wallet, your revenue.</p>
+  </div>
+</div></section>
+</div>
+
+<!-- ==================== FOOTER (all pages) ==================== -->
+<footer class="ft"><div class="c">
+  <div class="ft-top">
+    <div class="ft-brand">
+      <div class="logo" style="color:var(--txI);font-size:14px">Pay<span class="logo-toll">Toll</span></div>
+      <p>Open-source developer toolkit for machine payments on Solana.</p>
+    </div>
+    <div class="ft-cols">
+      <div><div class="ft-ct">Product</div><a class="ft-lk" onclick="go('home')">SDK</a><a class="ft-lk" onclick="go('home')">CLI</a><a class="ft-lk" onclick="go('home')">Dashboard</a><a class="ft-lk" onclick="go('pricing')">Pricing</a></div>
+      <div><div class="ft-ct">Developers</div><a class="ft-lk" onclick="go('docs')">Docs</a><a class="ft-lk" onclick="go('docs')">Quickstart</a><a class="ft-lk" onclick="go('docs')">Examples</a><a href="#" class="ft-lk">Changelog</a></div>
+      <div><div class="ft-ct">Resources</div><a class="ft-lk" onclick="go('blog')">Blog</a><a href="https://mpp.dev" class="ft-lk" target="_blank">MPP Spec ↗</a><a href="https://github.com/paytoll" class="ft-lk" target="_blank">GitHub ↗</a><a href="#" class="ft-lk">X ↗</a></div>
+      <div><div class="ft-ct">Legal</div><a href="#" class="ft-lk">Terms</a><a href="#" class="ft-lk">Privacy</a><a href="#" class="ft-lk">License</a></div>
+    </div>
+  </div>
+  <div class="ft-btm"><span>© 2026 PayToll. MIT License.</span><div class="ft-bl"><a href="#">Terms</a><a href="#">Privacy</a><a href="https://github.com/paytoll" target="_blank">GitHub</a></div></div>
+</div></footer>
+
+<script>
+// Mobile menu
+function toggleMobile(){
+  document.getElementById('hamburger').classList.toggle('open');
+  document.getElementById('mobileMenu').classList.toggle('open');
+}
+function closeMobile(){
+  document.getElementById('hamburger').classList.remove('open');
+  document.getElementById('mobileMenu').classList.remove('open');
+}
+
+// Desktop dropdown menus — click to open, click outside to close
+document.querySelectorAll('.tab-dd > .nav-tab').forEach(tab => {
+  tab.addEventListener('click', function(e) {
+    e.stopPropagation();
+    const parent = this.parentElement;
+    const wasOpen = parent.classList.contains('open');
+    // Close all
+    document.querySelectorAll('.tab-dd').forEach(d => d.classList.remove('open'));
+    if (!wasOpen) parent.classList.add('open');
+  });
+});
+document.addEventListener('click', () => {
+  document.querySelectorAll('.tab-dd').forEach(d => d.classList.remove('open'));
+});
+document.querySelectorAll('.tab-menu').forEach(menu => {
+  menu.addEventListener('click', (e) => e.stopPropagation());
+});
+// Close dropdowns when clicking a tab-item
+document.querySelectorAll('.tab-item').forEach(item => {
+  item.addEventListener('click', () => {
+    document.querySelectorAll('.tab-dd').forEach(d => d.classList.remove('open'));
+  });
+});
+
+// Scroll to doc section
+function scrollToDoc(id) {
+  const el = document.getElementById('doc-' + id);
+  if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+// Line numbers background
+const lb=document.getElementById('lineBg');
+for(let i=1;i<=200;i++){const s=document.createElement('span');s.textContent=i;lb.appendChild(s)}
+
+// SPA Routing
+function go(page){
+  closeMobile();
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  const el=document.getElementById('page-'+page);
+  if(el){el.classList.add('active');window.scrollTo(0,0);initPage()}
+}
+
+function initPage(){
+  // Re-observe reveals
+  document.querySelectorAll('.rv:not(.v)').forEach(el=>ro.observe(el));
+  // Re-observe typed blocks
+  document.querySelectorAll('[data-typed]').forEach(el=>{
+    const lines=el.querySelectorAll('.cl,.tl');
+    let allHidden=false;lines.forEach(l=>{if(!l.classList.contains('on'))allHidden=true});
+    if(allHidden)to.observe(el);
+  });
+}
+
+// Docs sidebar active state
+document.querySelectorAll('.docs-nav-link').forEach(link => {
+  link.addEventListener('click', function() {
+    document.querySelectorAll('.docs-nav-link').forEach(l => l.classList.remove('active'));
+    this.classList.add('active');
+  });
+});
+
+// Scroll reveal
+const ro=new IntersectionObserver(es=>{
+  es.forEach(e=>{if(e.isIntersecting){e.target.classList.add('v');ro.unobserve(e.target)}})
+},{threshold:.06,rootMargin:'0px 0px -20px 0px'});
+document.querySelectorAll('.rv').forEach(el=>ro.observe(el));
+
+// Typing
+const to=new IntersectionObserver(es=>{
+  es.forEach(e=>{
+    if(e.isIntersecting){
+      const lines=e.target.querySelectorAll('.cl,.tl');
+      lines.forEach((l,i)=>setTimeout(()=>l.classList.add('on'),i*90));
+      to.unobserve(e.target);
+    }
+  })
+},{threshold:.2});
+document.querySelectorAll('[data-typed]').forEach(el=>to.observe(el));
+</script>
+</body>
+</html>
